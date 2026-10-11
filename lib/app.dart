@@ -1,32 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'core/theme/app_theme.dart';
-import 'features/auth/presentation/screens/login_screen.dart';
-import 'features/auth/presentation/screens/register_screen.dart'; // ← NUEVO
-import 'features/auth/presentation/screens/splash_screen.dart';
-import 'features/home/presentation/screens/home_screen.dart';
 import 'features/aliado/presentation/screens/aliado_shell_screen.dart';
 import 'features/aliado/presentation/screens/crear_distribuidor_screen.dart';
 import 'features/aliado/presentation/screens/distribuidor_detalle_screen.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'features/catalogo/presentation/screens/catalogo_placeholder_screen.dart';
-import 'features/perfil/presentation/screens/perfil_screen.dart';
-import 'features/perfil/presentation/screens/editar_perfil_screen.dart';
+import 'features/auth/presentation/screens/login_screen.dart';
+import 'features/auth/presentation/screens/register_screen.dart';
+import 'features/auth/presentation/screens/splash_screen.dart';
+import 'features/catalogo/presentation/screens/catalogo_shell_screen.dart';
+import 'features/catalogo/presentation/screens/producto_detalle_screen.dart';
+import 'features/catalogo/presentation/screens/productos_list_screen.dart';
+import 'features/catalogo/presentation/screens/search_screen.dart';
+import 'features/home/presentation/screens/home_screen.dart';
 import 'features/perfil/presentation/screens/cambiar_password_screen.dart';
+import 'features/perfil/presentation/screens/editar_perfil_screen.dart';
 import 'features/perfil/presentation/screens/perfil_distribuidor_screen.dart';
+import 'features/perfil/presentation/screens/perfil_screen.dart';
 
 final _router = GoRouter(
   initialLocation: '/splash',
   routes: [
+    // Auth
     GoRoute(path: '/splash', builder: (_, _) => const SplashScreen()),
     GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
     GoRoute(path: '/register', builder: (_, _) => const RegisterScreen()),
     GoRoute(path: '/home', builder: (_, _) => const HomeScreen()),
+
+    // Catálogo
+    GoRoute(path: '/catalogo', builder: (_, _) => const CatalogoShellScreen()),
     GoRoute(
-      path: '/catalogo',
-      builder: (_, _) => const CatalogoPlaceholderScreen(),
+      path: '/catalogo/productos',
+      builder: (_, _) => const ProductosListScreen(),
+    ),
+    GoRoute(
+      path: '/catalogo/categoria/:id',
+      builder: (_, state) => ProductosListScreen(
+        categoriaId: int.parse(state.pathParameters['id']!),
+        titulo: 'Categoría',
+      ),
+    ),
+    GoRoute(path: '/catalogo/buscar', builder: (_, _) => const SearchScreen()),
+    GoRoute(
+      path: '/catalogo/producto/:slug',
+      builder: (_, state) =>
+          ProductoDetalleScreen(idOrSlug: state.pathParameters['slug']!),
+    ),
+
+    // Mi Perfil
+    GoRoute(path: '/perfil', builder: (_, _) => const PerfilScreen()),
+    GoRoute(
+      path: '/perfil/editar',
+      builder: (_, _) => const EditarPerfilScreen(),
+    ),
+    GoRoute(
+      path: '/perfil/password',
+      builder: (_, _) => const CambiarPasswordScreen(),
+    ),
+    GoRoute(
+      path: '/perfil/distribuidor',
+      builder: (_, _) => const PerfilDistribuidorScreen(),
     ),
 
     // Panel del Aliado
@@ -49,20 +84,6 @@ final _router = GoRouter(
         ),
       ),
     ),
-    // Mi Perfil
-    GoRoute(path: '/perfil', builder: (_, _) => const PerfilScreen()),
-    GoRoute(
-      path: '/perfil/editar',
-      builder: (_, _) => const EditarPerfilScreen(),
-    ),
-    GoRoute(
-      path: '/perfil/password',
-      builder: (_, _) => const CambiarPasswordScreen(),
-    ),
-    GoRoute(
-      path: '/perfil/distribuidor',
-      builder: (_, _) => const PerfilDistribuidorScreen(),
-    ),
   ],
 );
 
@@ -81,11 +102,8 @@ class MrReceturaApp extends ConsumerWidget {
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light,
           routerConfig: _router,
-          // NUEVO: locale español
           locale: const Locale('es', 'VE'),
           supportedLocales: const [Locale('es', 'VE'), Locale('en', 'US')],
-          // Necesitas estos imports para los delegate:
-          // import 'package:flutter_localizations/flutter_localizations.dart';
           localizationsDelegates: const [
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
