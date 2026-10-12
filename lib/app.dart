@@ -19,6 +19,11 @@ import 'features/perfil/presentation/screens/cambiar_password_screen.dart';
 import 'features/perfil/presentation/screens/editar_perfil_screen.dart';
 import 'features/perfil/presentation/screens/perfil_distribuidor_screen.dart';
 import 'features/perfil/presentation/screens/perfil_screen.dart';
+import 'features/checkout/presentation/screens/checkout_screen.dart';
+import 'features/checkout/presentation/screens/pedido_confirmado_screen.dart';
+import 'features/pedidos/presentation/screens/pedidos_list_screen.dart';
+import 'features/pedidos/presentation/screens/pedido_detalle_screen.dart';
+import 'features/pedidos/presentation/screens/reportar_pago_screen.dart';
 
 final _router = GoRouter(
   initialLocation: '/splash',
@@ -83,6 +88,26 @@ final _router = GoRouter(
           child: Text('Pedido #${state.pathParameters['id']} — próximamente'),
         ),
       ),
+    ),
+    // Checkout
+    GoRoute(path: '/checkout', builder: (_, _) => const CheckoutScreen()),
+    GoRoute(
+      path: '/pedido-confirmado/:id',
+      builder: (_, state) => PedidoConfirmadoScreen(
+        pedidoId: int.parse(state.pathParameters['id']!),
+      ),
+    ),
+    // Placeholder de pedidos (lo hacemos después)
+    GoRoute(path: '/pedidos', builder: (_, _) => const PedidosListScreen()),
+    GoRoute(
+      path: '/pedidos/:id/reportar-pago',
+      builder: (_, state) =>
+          ReportarPagoScreen(pedidoId: int.parse(state.pathParameters['id']!)),
+    ),
+    GoRoute(
+      path: '/pedidos/:id',
+      builder: (_, state) =>
+          PedidoDetalleScreen(pedidoId: int.parse(state.pathParameters['id']!)),
     ),
   ],
 );

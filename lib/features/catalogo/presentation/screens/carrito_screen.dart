@@ -9,6 +9,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/empty_view.dart';
 import '../../../carrito/data/models/cart_item.dart';
 import '../../../carrito/presentation/providers/cart_provider.dart';
+import 'package:go_router/go_router.dart';
 
 class CarritoScreen extends ConsumerWidget {
   const CarritoScreen({super.key});
@@ -65,10 +66,7 @@ class CarritoScreen extends ConsumerWidget {
                   iva: cart.iva,
                   total: cart.total,
                   onCheckout: () {
-                    // TODO Bloque 6 (checkout)
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Checkout próximamente')),
-                    );
+                    context.go('/checkout');
                   },
                 ),
               ],

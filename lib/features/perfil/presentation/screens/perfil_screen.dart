@@ -89,6 +89,14 @@ class PerfilScreen extends ConsumerWidget {
 
               // ===== Opciones =====
               _OpcionTile(
+                icon: Icons.receipt_long_outlined,
+                title: 'Mis Pedidos',
+                subtitle: 'Historial de tus compras',
+                onTap: () => context.push('/pedidos'),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+
+              _OpcionTile(
                 icon: Icons.person_outline,
                 title: 'Información personal',
                 subtitle: 'Nombre, cédula, dirección, etc.',
