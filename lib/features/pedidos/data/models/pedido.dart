@@ -39,6 +39,7 @@ class Pedido {
   final Map<String, dynamic>? clienteDestino;
 
   final DateTime? createdAt;
+  final Map<String, dynamic>? user;
 
   const Pedido({
     required this.id,
@@ -72,6 +73,7 @@ class Pedido {
     required this.transacciones,
     this.clienteDestino,
     this.createdAt,
+    this.user,
   });
 
   factory Pedido.fromJson(Map<String, dynamic> j) => Pedido(
@@ -123,6 +125,9 @@ class Pedido {
         : null,
     createdAt: j['created_at'] != null
         ? DateTime.tryParse(j['created_at'] as String)
+        : null,
+    user: j['user'] != null
+        ? Map<String, dynamic>.from(j['user'] as Map)
         : null,
   );
 

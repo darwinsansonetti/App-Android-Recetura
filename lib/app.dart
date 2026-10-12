@@ -82,11 +82,9 @@ final _router = GoRouter(
     ),
     GoRoute(
       path: '/aliado/pedidos/:id',
-      builder: (_, state) => Scaffold(
-        appBar: AppBar(title: const Text('Detalle del Pedido')),
-        body: Center(
-          child: Text('Pedido #${state.pathParameters['id']} — próximamente'),
-        ),
+      builder: (_, state) => PedidoDetalleScreen(
+        pedidoId: int.parse(state.pathParameters['id']!),
+        esVistaAliado: true,
       ),
     ),
     // Checkout

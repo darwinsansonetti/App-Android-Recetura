@@ -34,7 +34,6 @@ class _ReportarPagoScreenState extends ConsumerState<ReportarPagoScreen> {
 
   String? _bancoOrigen;
   double _tasa = 1.0;
-  bool _tasaCargada = false;
 
   @override
   void initState() {
@@ -53,13 +52,10 @@ class _ReportarPagoScreenState extends ConsumerState<ReportarPagoScreen> {
       if (!mounted) return;
       setState(() {
         _tasa = tasa.valor;
-        _tasaCargada = true;
       });
     } catch (_) {
       if (!mounted) return;
-      setState(() {
-        _tasaCargada = false;
-      });
+      setState(() {});
     }
   }
 

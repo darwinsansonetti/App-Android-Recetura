@@ -47,4 +47,14 @@ class PedidosRepository {
     }
     return Pedido.fromJson(Map<String, dynamic>.from(data));
   }
+
+  /// GET /aliado/pedidos/{id} — para el panel del Aliado
+  Future<Pedido> getPedidoAliado(int id) async {
+    final r = await _dio.get('/aliado/pedidos/$id');
+    final data = DioClient.unwrap(r);
+    if (data is! Map) {
+      throw Exception('Formato inesperado en /aliado/pedidos/$id');
+    }
+    return Pedido.fromJson(Map<String, dynamic>.from(data));
+  }
 }

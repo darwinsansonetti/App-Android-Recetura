@@ -12,16 +12,22 @@ import '../../data/models/pedido.dart';
 import '../../data/models/pedido_detalle_item.dart';
 import '../../data/models/pedido_transaccion.dart';
 import '../providers/pedidos_providers.dart';
-import '../widgets/pedido_estado_chip.dart';
 import 'package:go_router/go_router.dart';
 
 class PedidoDetalleScreen extends ConsumerWidget {
   final int pedidoId;
-  const PedidoDetalleScreen({super.key, required this.pedidoId});
+  final bool esVistaAliado;
+  const PedidoDetalleScreen({
+    super.key,
+    required this.pedidoId,
+    this.esVistaAliado = false,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final async = ref.watch(pedidoDetalleProvider(pedidoId));
+    final async = ref.watch(
+      pedidoDetalleVistaProvider((id: pedidoId, esAliado: esVistaAliado)),
+    );
     final user = ref.watch(authProvider).user;
     final hPad = Responsive.horizontalPadding(context);
 
@@ -33,8 +39,11 @@ class PedidoDetalleScreen extends ConsumerWidget {
         data: (pedido) => ListView(
           padding: EdgeInsets.all(hPad),
           children: [
-            _HeaderPedido(pedido: pedido),
-            const SizedBox(height: AppSpacing.lg),
+            // Si viene del panel del Aliado, mostrar info del distribuidor
+            if (esVistaAliado && pedido.user != null) ...[
+              _CardDistribuidor(user: pedido.user!),
+              const SizedBox(height: AppSpacing.lg),
+            ],
 
             _SeccionProductos(pedido: pedido),
             const SizedBox(height: AppSpacing.lg),
@@ -63,96 +72,6 @@ class PedidoDetalleScreen extends ConsumerWidget {
             const SizedBox(height: AppSpacing.xxl),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// ============ HEADER ============
-
-class _HeaderPedido extends StatelessWidget {
-  final Pedido pedido;
-  const _HeaderPedido({required this.pedido});
-
-  @override
-  Widget build(BuildContext context) {
-    final fecha = pedido.createdAt != null
-        ? DateFormat('dd MMM yyyy, hh:mm a', 'es').format(pedido.createdAt!)
-        : '—';
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: AppRadius.lgAll,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  pedido.numeroPedido,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ),
-              PedidoEstadoChip(
-                texto: pedido.estadoTexto,
-                colorValue: pedido.estadoColorValue,
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(fecha, style: Theme.of(context).textTheme.bodySmall),
-
-          if (pedido.direccionEnvio != null &&
-              pedido.direccionEnvio!.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.md),
-            const Divider(),
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              children: [
-                const Icon(
-                  Icons.location_on_outlined,
-                  size: 16,
-                  color: AppColors.textSecondary,
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    pedido.direccionEnvio!,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-              ],
-            ),
-          ],
-
-          if (pedido.notas != null && pedido.notas!.isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Row(
-              children: [
-                const Icon(
-                  Icons.notes,
-                  size: 16,
-                  color: AppColors.textSecondary,
-                ),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    pedido.notas!,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
       ),
     );
   }
@@ -673,6 +592,64 @@ class _BotonReportarPago extends StatelessWidget {
             borderRadius: BorderRadius.all(Radius.circular(12)),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _CardDistribuidor extends StatelessWidget {
+  final Map<String, dynamic> user;
+  const _CardDistribuidor({required this.user});
+
+  @override
+  Widget build(BuildContext context) {
+    final nombre = (user['nombre_completo'] ?? user['name'] ?? '') as String;
+    final email = (user['email'] ?? '') as String;
+    final celular = user['celular'] as String?;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      decoration: BoxDecoration(
+        color: AppColors.info.withValues(alpha: 0.06),
+        borderRadius: AppRadius.lgAll,
+        border: Border.all(color: AppColors.info.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.person_pin_circle_outlined,
+                color: AppColors.info,
+                size: 20,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'Distribuidor',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.info,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            nombre,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(email, style: Theme.of(context).textTheme.bodySmall),
+          if (celular != null && celular.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(celular, style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ],
       ),
     );
   }

@@ -121,3 +121,12 @@ final pedidoDetalleProvider = FutureProvider.autoDispose.family<Pedido, int>((
 ) {
   return ref.read(pedidosRepositoryProvider).getPedido(id);
 });
+
+/// Pedido detalle — puede venir desde /pedidos o /aliado/pedidos
+final pedidoDetalleVistaProvider = FutureProvider.autoDispose
+    .family<Pedido, ({int id, bool esAliado})>((ref, params) {
+      final repo = ref.read(pedidosRepositoryProvider);
+      return params.esAliado
+          ? repo.getPedidoAliado(params.id)
+          : repo.getPedido(params.id);
+    });
