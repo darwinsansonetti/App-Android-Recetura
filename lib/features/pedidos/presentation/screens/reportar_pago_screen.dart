@@ -112,6 +112,8 @@ class _ReportarPagoScreenState extends ConsumerState<ReportarPagoScreen> {
       ref.invalidate(pedidoDetalleProvider(widget.pedidoId));
       ref.invalidate(estadoCuentaProvider(widget.pedidoId));
 
+      ref.invalidate(pedidosPaginadosProvider);
+
       if (!mounted) return;
       await showDialog(
         context: context,
@@ -191,7 +193,6 @@ class _ReportarPagoScreenState extends ConsumerState<ReportarPagoScreen> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  prefixIcon: const Icon(Icons.attach_money),
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'Requerido';
                     final d = double.tryParse(v);

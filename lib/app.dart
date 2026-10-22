@@ -25,6 +25,10 @@ import 'features/pedidos/presentation/screens/pedidos_list_screen.dart';
 import 'features/pedidos/presentation/screens/pedido_detalle_screen.dart';
 import 'features/pedidos/presentation/screens/reportar_pago_screen.dart';
 
+import 'features/checkout/presentation/screens/sypago_form_screen.dart';
+import 'features/checkout/presentation/screens/sypago_otp_screen.dart';
+import 'features/checkout/presentation/screens/sypago_espera_screen.dart';
+
 final _router = GoRouter(
   initialLocation: '/splash',
   routes: [
@@ -106,6 +110,26 @@ final _router = GoRouter(
       path: '/pedidos/:id',
       builder: (_, state) =>
           PedidoDetalleScreen(pedidoId: int.parse(state.pathParameters['id']!)),
+    ),
+
+    // SyPago
+    GoRoute(
+      path: '/sypago/:pedidoId/form',
+      builder: (_, state) => SypagoFormScreen(
+        pedidoId: int.parse(state.pathParameters['pedidoId']!),
+      ),
+    ),
+    GoRoute(
+      path: '/sypago/:pedidoId/otp',
+      builder: (_, state) => SypagoOtpScreen(
+        pedidoId: int.parse(state.pathParameters['pedidoId']!),
+      ),
+    ),
+    GoRoute(
+      path: '/sypago/:pedidoId/espera',
+      builder: (_, state) => SypagoEsperaScreen(
+        pedidoId: int.parse(state.pathParameters['pedidoId']!),
+      ),
     ),
   ],
 );

@@ -50,15 +50,19 @@ class AppBancos {
   ];
 
   /// Banco destino por defecto (el que aparece en la web)
-  static const String bancoDestinoDefault = 'Banesco';
+  static const String bancoDestinoDefault = 'Bancamiga (0172)';
 
   /// Datos bancarios de MR. Recetura (los que se muestran en el checkout)
-  static const String pagoMovilTelefono = '0424-8788246';
-  static const String pagoMovilBanco = 'Banesco (0134)';
+  // ============================================================
+  // Datos de Pago Móvil de MR. Recetura (los que se muestran)
+  // ============================================================
+  static const String pagoMovilTelefono = '0424-6298552';
+  static const String pagoMovilBanco = 'Bancamiga (0172)';
   static const String pagoMovilDocumento = 'J-50443556-2';
 
-  static const String transferenciaBanco = 'Banesco';
-  static const String transferenciaCuenta = '0102-0515-84-0001565903';
+  // Datos de Transferencia (por si acaso)
+  static const String transferenciaBanco = 'Bancamiga';
+  static const String transferenciaCuenta = '0172-0702-49-7025859153';
   static const String transferenciaTipoCuenta = 'Corriente';
   static const String transferenciaTitular = 'Mr Casa de Recetura';
 }

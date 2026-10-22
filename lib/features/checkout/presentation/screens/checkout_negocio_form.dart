@@ -13,6 +13,7 @@ import '../../data/models/carrito_calculado.dart';
 import '../providers/checkout_providers.dart';
 import '../widgets/checkout_resumen.dart';
 import '../../../catalogo/presentation/providers/catalog_providers.dart';
+import '../../../pedidos/presentation/providers/pedidos_providers.dart';
 
 class CheckoutNegocioForm extends ConsumerStatefulWidget {
   final CarritoCalculado calculo;
@@ -122,6 +123,9 @@ class CheckoutNegocioFormState extends ConsumerState<CheckoutNegocioForm> {
     if (!mounted) return;
     if (pedidoId != null) {
       await ref.read(cartProvider.notifier).clear();
+
+      ref.invalidate(pedidosPaginadosProvider);
+
       if (!mounted) return;
       context.go('/pedido-confirmado/$pedidoId');
     } else {
@@ -164,7 +168,6 @@ class CheckoutNegocioFormState extends ConsumerState<CheckoutNegocioForm> {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              prefixIcon: const Icon(Icons.attach_money),
               validator: (v) {
                 if (v == null || v.isEmpty) return 'Requerido';
                 if (double.tryParse(v) == null) return 'Monto inválido';
@@ -314,6 +317,102 @@ class CheckoutNegocioFormState extends ConsumerState<CheckoutNegocioForm> {
             ),
             const SizedBox(height: AppSpacing.xl),
 
+            // ===== Separador =====
+            const SizedBox(height: AppSpacing.xl),
+            Row(
+              children: [
+                Expanded(child: Divider(color: AppColors.borderLight)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                  ),
+                  child: Text(
+                    'O',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+                Expanded(child: Divider(color: AppColors.borderLight)),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xl),
+
+            // ===== Botón Pagar con SyPago =====
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: AppColors.info.withValues(alpha: 0.06),
+                borderRadius: AppRadius.mdAll,
+                border: Border.all(
+                  color: AppColors.info.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    'Pago instantáneo con SyPago',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Paga al instante con débito OTP. Tu pago se confirma en segundos.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  OutlinedButton.icon(
+                    onPressed: loading
+                        ? null
+                        : () async {
+                            // Validar dirección del negocio y del cliente destino
+                            if (_direccionCtrl.text.trim().isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Por favor ingresa tu dirección de envío',
+                                  ),
+                                  backgroundColor: AppColors.error,
+                                ),
+                              );
+                              return;
+                            }
+
+                            if (_cdNombreCtrl.text.trim().isEmpty ||
+                                _cdApellidoCtrl.text.trim().isEmpty ||
+                                _cdCedulaCtrl.text.trim().isEmpty ||
+                                _cdTelefonoCtrl.text.trim().isEmpty ||
+                                _cdDireccionCtrl.text.trim().isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Por favor completa los datos del cliente destino (nombre, apellido, cédula, teléfono y dirección)',
+                                  ),
+                                  backgroundColor: AppColors.error,
+                                ),
+                              );
+                              return;
+                            }
+
+                            final navContext = context;
+                            final pedidoId = await _crearPedidoParaSypago();
+                            if (pedidoId == null) return;
+                            if (!navContext.mounted) return;
+
+                            navContext.push('/sypago/$pedidoId/form');
+                          },
+                    icon: const Icon(Icons.bolt),
+                    label: const Text('Pagar con SyPago'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 48),
+                      foregroundColor: AppColors.info,
+                      side: const BorderSide(color: AppColors.info),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
             CheckoutResumen(
               calculo: widget.calculo,
               onConfirm: _submit,
@@ -338,6 +437,48 @@ class CheckoutNegocioFormState extends ConsumerState<CheckoutNegocioForm> {
         _fechaCtrl.text = DateFormat('yyyy-MM-dd').format(picked);
       });
     }
+  }
+
+  Future<int?> _crearPedidoParaSypago() async {
+    FocusScope.of(context).unfocus();
+    final cartItems = ref.read(cartProvider).items;
+
+    // Crear pedido con datos temporales + cliente destino
+    final pedido = await ref
+        .read(checkoutProvider.notifier)
+        .crearPedido(
+          items: cartItems,
+          numeroReferencia: 'TEMP-${DateTime.now().millisecondsSinceEpoch}',
+          monto: double.parse(_montoCtrl.text),
+          fechaPago: _fechaCtrl.text,
+          cedulaIdentidad: _cedulaCtrl.text.trim(),
+          bancoOrigen: _bancoOrigen ?? AppBancos.bancoDestinoDefault,
+          bancoDestino: AppBancos.bancoDestinoDefault,
+          direccionEnvio: _direccionCtrl.text.trim(),
+          notas: _notasCtrl.text.trim(),
+          // ⚠️ IMPORTANTE: Enviar el cliente destino
+          clienteDestino: {
+            'nombre': _cdNombreCtrl.text.trim(),
+            'apellido': _cdApellidoCtrl.text.trim(),
+            'cedula': _cdCedulaCtrl.text.trim(),
+            'telefono': _cdTelefonoCtrl.text.trim(),
+            'direccion': _cdDireccionCtrl.text.trim(),
+            if (_cdObservacionCtrl.text.trim().isNotEmpty)
+              'observacion': _cdObservacionCtrl.text.trim(),
+          },
+        );
+
+    if (pedido == null) {
+      if (!mounted) return null;
+      final err = ref.read(checkoutProvider).error ?? 'Error';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(err), backgroundColor: AppColors.error),
+      );
+      return null;
+    }
+
+    ref.invalidate(pedidosPaginadosProvider);
+    return pedido;
   }
 }
 
